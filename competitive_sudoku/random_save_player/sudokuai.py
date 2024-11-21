@@ -20,42 +20,35 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
 
     # Uses solve_sudoku to compute a greedy move.
     def compute_best_move(self, game_state: GameState) -> None:
-        """
+        '''
         Example code for load/save functionality
-        """
-        # Create some random test data
+        '''
+        #Create some random test data
         test_data = np.random.randint(low=1, high=10, size=10000000)
 
-        # Save data
+        #Save data
         self.save(test_data)
 
-        # Load data
+        #Load data
         saved_data = self.load()
 
-        """
+        '''
         Random player functionality
-        """
+        '''
         board = game_state.board
         board_text = str(board)
-        options = "--random"
-        taboo_moves = " ".join(
-            f"{move.square[0]} {move.square[1]} {move.value}"
-            for move in game_state.taboo_moves
-        )
+        options = '--random'
+        taboo_moves = ' '.join(f'{move.square[0]} {move.square[1]} {move.value}' for move in game_state.taboo_moves)
         if taboo_moves:
             options += f' --taboo="{taboo_moves}"'
         player_squares = game_state.player_squares()
         if player_squares is not None:
-            allowed = " ".join(
-                str(board.square2index(square)) for square in player_squares
-            )
+            allowed = ' '.join(str(board.square2index(square)) for square in player_squares)
             options += f' --allowed="{allowed}"'
         output = solve_sudoku(self.solve_sudoku_path, board_text, options)
-        print(output)
-
         m = re.search(r"Generated move \((\d+),(\d+)\)", output)
         if not m:
-            raise RuntimeError("Could not generate a random move:\n" + output)
+            raise RuntimeError('Could not generate a random move:\n' + output)
         k = int(m.group(1))
         value = int(m.group(2))
         square = board.index2square(k)
