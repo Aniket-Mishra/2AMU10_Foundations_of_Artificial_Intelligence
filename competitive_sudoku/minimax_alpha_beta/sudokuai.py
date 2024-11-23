@@ -117,7 +117,7 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         """
         Evaluates the game state with a heuristic based on the score and potential moves.
         """
-        return sum(game_state.scores)  # Use cumulative score as the heuristic
+        return sum(game_state.scores)
 
     def minimax(self, game_state: GameState, depth: int, alpha: float, beta: float, maximizing: bool):
         """
@@ -135,7 +135,7 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                 eval = self.minimax(next_state, depth - 1, alpha, beta, maximizing=False)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
-                if beta <= alpha:  # Prune the branch
+                if beta <= alpha:
                     break
             return max_eval
         else:
@@ -145,7 +145,7 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                 eval = self.minimax(next_state, depth - 1, alpha, beta, maximizing=True)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
-                if beta <= alpha:  # Prune the branch
+                if beta <= alpha:
                     break
             return min_eval
 

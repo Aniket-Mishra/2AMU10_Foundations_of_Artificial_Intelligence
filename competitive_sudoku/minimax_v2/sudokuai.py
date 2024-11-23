@@ -117,7 +117,7 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         """
         Evaluates the game state with a heuristic based on the score and potential moves.
         """
-        return sum(game_state.scores)  # Use cumulative score as the heuristic
+        return sum(game_state.scores)
 
     def minimax(self, game_state: GameState, depth: int, maximizing: bool):
         """
