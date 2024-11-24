@@ -1,6 +1,6 @@
 import random
 import copy
-from competitive_sudoku.sudoku import GameState, Move, TabooMove, SudokuBoard, pretty_print_sudoku_board, pretty_print_game_state
+from competitive_sudoku.sudoku import GameState, Move, TabooMove, SudokuBoard
 import competitive_sudoku.sudokuai
 from typing import Tuple
 
@@ -12,58 +12,60 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
     def __init__(self):
         super().__init__()
 
-    def amount_of_regions_completed(self, game_state: GameState, move: Move):
-        """
-        Checks how many regions (rows, columns, blocks) are completed by the move.
-        """
-        completed = 0
-        N = game_state.board.N
-        row, col = move.square
+    # def get_valid_moves(self, game_state):
+    #     N = game_state.board.N
 
-        # Check row
-        if all(game_state.board.get((row, c)) != SudokuBoard.empty for c in range(N)):
-            completed += 1
+    #     # print(f"{game_state.player_squares()=}")
+    #     def possible(i, j, value):
+    #         return (
+    #             game_state.board.get((i, j)) == SudokuBoard.empty
+    #             and not TabooMove((i, j), value) in game_state.taboo_moves
+    #             and (i, j) in game_state.player_squares()
+    #             and value
+    #             not in [
+    #                 game_state.board.get((i, col))
+    #                 for col in range(game_state.board.N)
+    #                 if col != j
+    #             ]
+    #             and value
+    #             not in [
+    #                 game_state.board.get((row, j))
+    #                 for row in range(game_state.board.N)
+    #                 if row != i
+    #             ]
+    #             and not any(
+    #                 game_state.board.get((r, c)) == value
+    #                 for r in range(
+    #                     (i // game_state.board.region_height())
+    #                     * game_state.board.region_height(),
+    #                     ((i // game_state.board.region_height()) + 1)
+    #                     * game_state.board.region_height(),
+    #                 )
+    #                 for c in range(
+    #                     (j // game_state.board.region_width())
+    #                     * game_state.board.region_width(),
+    #                     ((j // game_state.board.region_width()) + 1)
+    #                     * game_state.board.region_width(),
+    #                 )
+    #             )
+    #         )
 
-        # Check column
-        if all(game_state.board.get((r, col)) != SudokuBoard.empty for r in range(N)):
-            completed += 1
+    #     return [
+    #         Move((i, j), value)
+    #         for i in range(N)
+    #         for j in range(N)
+    #         for value in range(1, N + 1)
+    #         if possible(i, j, value)
+    #     ]
 
-        # Check block
-        region_width = game_state.board.region_width()
-        region_height = game_state.board.region_height()
-        start_row = (row // region_height) * region_height
-        start_col = (col // region_width) * region_width
-        if all(
-            game_state.board.get((r, c)) != SudokuBoard.empty
-            for r in range(start_row, start_row + region_height)
-            for c in range(start_col, start_col + region_width)
-        ):
-            completed += 1
-
-        return completed
-    
     def simulate_move(self, game_state: GameState, move: Move):
         """
         Simulates a move and returns a new game state.
         """
         new_state = copy.deepcopy(game_state)
         new_state.board.put(move.square, move.value)
-        
-        completed_regions = self.amount_of_regions_completed(new_state, move)
-        if completed_regions > 0:
-            new_state.scores[new_state.current_player - 1] += self.get_region_score(completed_regions) 
-
-        new_state.current_player = 3 - new_state.current_player # We forgot to change player and therefore the score calculated gets added only to player 1      
         return new_state
 
-    def get_region_score(self, completed_regions):
-        if completed_regions == 1:
-            return 1
-        if completed_regions == 2:
-            return 3
-        if completed_regions == 3:
-            return 7
-        
     def get_valid_moves(self, game_state: GameState):
         """
         ours was failing and this one works
@@ -111,16 +113,13 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         """
         return len(self.get_valid_moves(game_state)) == 0
 
-
     def evaluate(self, game_state: GameState):
         """
         Evaluates the game state with a heuristic based on the score and potential moves.
         """
-        #print(f' game_state= {game_state.board}')
-        w1 = 0.8
-        w2 = 0.2
-        #return game_state.scores[0]
-        return (w1 * (game_state.scores[0] - game_state.scores[1])) + (w2 * (len(game_state.allowed_squares1) - len(game_state.allowed_squares2)))
+        w1 = 0.2
+        w2 = 0.8
+        return w1 * (game_state.scores[0] - game_state.scores[1]) + w2 * (len(game_state.allowed_squares1) - len(game_state.allowed_squares2))
 
     def minimax(self, game_state: GameState, depth: int, alpha: int, beta: int, maximizing: bool):
         """
@@ -130,13 +129,11 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             return self.evaluate(game_state)
 
         valid_moves = self.get_valid_moves(game_state)
-        
 
         if maximizing:
             max_eval = float('-inf')
             for move in valid_moves:
                 next_state = self.simulate_move(game_state, move)
-                #print(f'play move: {move} next_state player 1 maximizer= {pretty_print_game_state(next_state)}')
                 eval = self.minimax(next_state, depth - 1, alpha, beta, maximizing=False)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
@@ -147,7 +144,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             min_eval = float('inf')
             for move in valid_moves:
                 next_state = self.simulate_move(game_state, move)
-                #print(f'play move: {move} next_state player 2 minimizer= {pretty_print_game_state(next_state)}')
                 eval = self.minimax(next_state, depth - 1, alpha, beta, maximizing=True)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
@@ -165,12 +161,11 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         best_move = None
         best_score = float('-inf')
 
-        for depth in range(0, 5 +1):    # Iterative: 0 OR 1 --> I thought 0 otherwise we won't evaluate the moves we propose itself.
+        for depth in range(1, 5 +1):
             for move in valid_moves:
                 next_state = self.simulate_move(game_state, move)
                 score = self.minimax(next_state, depth, float('-inf'), float('inf'), maximizing=False)  # Include alpha/beta pruning
-                print(f'scores for move: {move} with depth={depth} best score={best_score} vs score={score}')
-                if score >= best_score:
+                if score > best_score:
                     best_score = score
                     best_move = move
                 if best_move:

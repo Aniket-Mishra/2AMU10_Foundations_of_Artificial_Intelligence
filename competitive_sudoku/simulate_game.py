@@ -20,7 +20,7 @@ from competitive_sudoku.sudoku import GameState, SudokuBoard, Move, TabooMove, p
     SudokuSettings, print_game_state, pretty_print_game_state, allowed_squares
 from competitive_sudoku.sudokuai import SudokuAI
 
-SUDOKU_SOLVER = 'bin\\solve_sudoku.exe' if platform.system() == 'Windows' else 'bin/solve_sudoku'
+SUDOKU_SOLVER = r"C:\Users\jelle\Documents\TUEindhoven\solve_sudoku.exe" if platform.system() == 'Windows' else 'bin/solve_sudoku'
 #SUDOKU_SOLVER = 'bin\\Windows\\solve_sudoku.exe' if platform.system() == 'Windows' else 'bin/solve_sudoku'
 
 GameResult = Tuple[float, float]
@@ -254,7 +254,7 @@ def play_game(board_file: Optional[str], name1: str, name2: str, calculation_tim
 
 def main():
     cmdline_parser = argparse.ArgumentParser(description='Script for simulating a competitive sudoku game.')
-    cmdline_parser.add_argument('--first', help="the module name of the first player's SudokuAI class (default: random_player)", default='random_player')
+    cmdline_parser.add_argument('--first', help="the module name of the first player's SudokuAI class (default: random_player)", default='minimax_v2')
     cmdline_parser.add_argument('--second', help="the module name of the second player's SudokuAI class (default: random_player)", default='random_player')
     cmdline_parser.add_argument('--time', help="the time (in seconds) for computing a move (default: 0.5)", type=float, default=0.5)
     cmdline_parser.add_argument('--check', help="check if the solve_sudoku program works", action='store_true')
