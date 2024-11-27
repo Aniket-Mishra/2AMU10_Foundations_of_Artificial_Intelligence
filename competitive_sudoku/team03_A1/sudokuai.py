@@ -129,10 +129,10 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         w2 = 0.1
 
         if ai_player_index == 0:
-            return (w1 * (game_state.scores[0] - game_state.scores[1]) )#+ (w2 * (len(game_state.allowed_squares1) - len(game_state.allowed_squares2))))
+            return (w1 * (game_state.scores[0] - game_state.scores[1]) + (w2 * (len(game_state.allowed_squares1) - len(game_state.allowed_squares2))))
         
         if ai_player_index == 1:
-            return (w1 * (game_state.scores[1] - game_state.scores[0]) )#+ (w2 * (len(game_state.allowed_squares2) - len(game_state.allowed_squares1))))
+            return (w1 * (game_state.scores[1] - game_state.scores[0]) + (w2 * (len(game_state.allowed_squares2) - len(game_state.allowed_squares1))))
 
 
     def minimax(self, game_state: GameState, depth: int, alpha: int, beta: int, maximizing: bool, ai_player_index: int):
@@ -183,8 +183,8 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
 
             for move in valid_moves:
                 next_state = self.simulate_move(game_state, move)
-                score = self.minimax(next_state, depth, float("-inf"), float("inf"), maximizing=False, ai_player_index=ai_player_index)  # Include alpha/beta pruning
-                depth_move_scores.append((move, score)) # Save all the (moves, scores) from every depth as a tuple for sorting
+                score = self.minimax(next_state, depth, float("-inf"), float("inf"), maximizing=False, ai_player_index=ai_player_index) 
+                depth_move_scores.append((move, score))
 
                 if score >= best_score:
                     best_score = score
@@ -192,4 +192,4 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                 if best_move:
                     self.propose_move(best_move)
             
-            valid_moves = [i[0] for i in sorted(depth_move_scores, key=lambda x: x[1], reverse=True)]   # Order valid_moves on evaluation score from previous depth
+            valid_moves = [i[0] for i in sorted(depth_move_scores, key=lambda x: x[1], reverse=True)] 

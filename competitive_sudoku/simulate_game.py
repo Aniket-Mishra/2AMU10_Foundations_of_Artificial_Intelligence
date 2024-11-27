@@ -340,7 +340,7 @@ def main():
         "--check", help="check if the solve_sudoku program works", action="store_true"
     )
     cmdline_parser.add_argument(
-        "--board", metavar="FILE", type=str, help="a text file containing a game state"
+        "--board", metavar="FILE", type=str, help="a text file containing a game state",
     )
     cmdline_parser.add_argument(
         "--quiet", help="print minimal output", action="store_true"
