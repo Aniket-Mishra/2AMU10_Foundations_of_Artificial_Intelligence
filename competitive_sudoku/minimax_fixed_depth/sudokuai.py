@@ -10,7 +10,7 @@ from competitive_sudoku.sudoku import (
 )
 import competitive_sudoku.sudokuai
 from typing import Tuple
-import time
+
 
 class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
     """
@@ -19,7 +19,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
 
     def __init__(self):
         super().__init__()
-        # self.cache = {}
 
     def amount_of_regions_completed(self, game_state: GameState, move: Move):
         """
@@ -55,22 +54,25 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         """
         Simulates a move and returns a new game state.
         """
-        score_dict = {0: 0, 1: 1, 2: 3, 3: 7}
+        score_dict = {1: 1, 2: 3, 3: 7}
 
         new_state = copy.deepcopy(game_state)
         new_state.board.put(move.square, move.value)
-        new_state.moves.append(move)
 
         completed_regions = self.amount_of_regions_completed(new_state, move)
-        
-        new_state.scores[new_state.current_player - 1] += score_dict[completed_regions]
+        if completed_regions > 0:
+            new_state.scores[new_state.current_player - 1] += score_dict[
+                completed_regions
+            ]
 
-        new_state.current_player = (3 - new_state.current_player)  # We forgot to change player and therefore the score calculated gets added only to player 1
+        new_state.current_player = (
+            3 - new_state.current_player
+        )  # We forgot to change player and therefore the score calculated gets added only to player 1
         return new_state
 
     def get_valid_moves(self, game_state: GameState):
         """
-        ours was failing, this works
+        ours was failing and this one works
         """
         N = game_state.board.N
 
@@ -135,21 +137,12 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         if ai_player_index == 1:
             return (w1 * (game_state.scores[1] - game_state.scores[0]) + (w2 * (len(game_state.allowed_squares2) - len(game_state.allowed_squares1))))
 
-
-    # def create_state_key(self, game_state: GameState, depth: int):  # Used for caching but not sure that it is correct yet
-    #     return (tuple(game_state.board.squares), game_state.current_player, tuple(game_state.scores), depth)
-
-
-    def minimax(self, game_state: GameState, depth: int, alpha: int, beta: int, maximizing: bool, ai_player_index: int):
+    def minimax(
+        self, game_state: GameState, depth: int, alpha: int, beta: int, maximizing: bool, ai_player_index: int
+    ):
         """
         Minimax implementation with depth-limited search.
         """
-        # state_key = self.create_state_key(game_state, depth)
-
-        # if state_key in self.cache:
-        #     print(f'cache hit for {pretty_print_sudoku_board(game_state.board, game_state)}')
-        #     return self.cache[state_key]
-        
         if depth == 0 or self.is_terminal(game_state):
             return self.evaluate(game_state, ai_player_index)
 
@@ -160,12 +153,13 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
             for move in valid_moves:
 
                 next_state = self.simulate_move(game_state, move)
-                eval = self.minimax(next_state, depth - 1, alpha, beta, maximizing=False, ai_player_index=ai_player_index)
+                eval = self.minimax(
+                    next_state, depth - 1, alpha, beta, maximizing=False, ai_player_index=ai_player_index
+                )
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
                 if beta <= alpha:
                     break
-            # self.cache[state_key] = max_eval
             return max_eval
         else:
             min_eval = float("inf")
@@ -176,35 +170,28 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                 beta = min(beta, eval)
                 if beta <= alpha:
                     break
-            # self.cache[state_key] = min_eval
             return min_eval
 
     def compute_best_move(self, game_state: GameState) -> None:
         """
-        Minimax with iterative deepening depth  # ToDo - Caching if needed
+        Minimax with only depth 2 :()
         """
-        ai_player_index = game_state.current_player-1
-        depth = (game_state.board.board_height() * game_state.board.board_width()) - (len(game_state.occupied_squares1) + len(game_state.occupied_squares2)) # Total number of unoccupied squares
-       
+        depth = 2
         valid_moves = self.get_valid_moves(game_state)
 
         best_move = None
         best_score = float("-inf")
 
-        for depth in range(1, depth + 1):  # Iterative: 0 OR 1 --> I thought 0 otherwise we won't evaluate the moves we propose itself. 1-5 is worse than 2 / 2-5 is better than 2
-            depth_move_scores = []
-
-            for move in valid_moves:
-                next_state = self.simulate_move(game_state, move)
-                score = self.minimax(next_state, depth, float("-inf"), float("inf"), maximizing=False, ai_player_index=ai_player_index)  # Include alpha/beta pruning
-                depth_move_scores.append((move, score)) # Save all the (moves, scores) from every depth as a tuple for sorting
-
-                print(f"scores for move: {move} with depth={depth} best score={best_score} vs score={score}")
-
-                if score >= best_score:
-                    best_score = score
-                    best_move = move
-                if best_move:
-                    self.propose_move(best_move)
-            
-            valid_moves = [i[0] for i in sorted(depth_move_scores, key=lambda x: x[1], reverse=True)]   # Order valid_moves on evaluation score from previous depth
+        for move in valid_moves:
+            next_state = self.simulate_move(game_state, move)
+            score = self.minimax(
+                next_state, depth, float("-inf"), float("inf"), maximizing=False, ai_player_index=game_state.current_player-1
+            )  # Include alpha/beta pruning
+            print(
+                f"scores for move: {move} with depth={depth} best score={best_score} vs score={score}"
+            )
+            if score >= best_score:
+                best_score = score
+                best_move = move
+            if best_move:
+                self.propose_move(best_move)
