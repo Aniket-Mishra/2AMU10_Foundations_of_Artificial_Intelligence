@@ -19,7 +19,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
 
     def __init__(self):
         super().__init__()
-        # self.cache = {}
 
     def amount_of_regions_completed(self, game_state: GameState, move: Move):
         """
