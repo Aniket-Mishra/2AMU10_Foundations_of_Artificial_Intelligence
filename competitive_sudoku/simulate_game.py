@@ -328,7 +328,7 @@ def main():
     cmdline_parser.add_argument(
         "--second",
         help="the module name of the second player's SudokuAI class (default: random_player)",
-        default="minimax_v2",
+        default="team03_A1",
     )
     cmdline_parser.add_argument(
         "--time",
