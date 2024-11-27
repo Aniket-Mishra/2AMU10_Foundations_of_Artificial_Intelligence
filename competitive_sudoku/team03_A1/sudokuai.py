@@ -10,7 +10,6 @@ from competitive_sudoku.sudoku import (
 )
 import competitive_sudoku.sudokuai
 from typing import Tuple
-import time
 
 class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
     """
@@ -64,12 +63,12 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         
         new_state.scores[new_state.current_player - 1] += score_dict[completed_regions]
 
-        new_state.current_player = (3 - new_state.current_player)  # We forgot to change player and therefore the score calculated gets added only to player 1
+        new_state.current_player = (3 - new_state.current_player)
         return new_state
 
     def get_valid_moves(self, game_state: GameState):
         """
-        ours was failing, this works
+        Gets the valid moves for the current Game State
         """
         N = game_state.board.N
 
@@ -114,11 +113,13 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         ]
         return region_values
 
+
     def is_terminal(self, game_state: GameState):
         """
         Checks if the game state is terminal (no valid moves left).
         """
         return len(self.get_valid_moves(game_state)) == 0
+
 
     def evaluate(self, game_state: GameState, ai_player_index: int):
         """
@@ -128,10 +129,10 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
         w2 = 0.1
 
         if ai_player_index == 0:
-            return (w1 * (game_state.scores[0] - game_state.scores[1]) + (w2 * (len(game_state.allowed_squares1) - len(game_state.allowed_squares2))))
+            return (w1 * (game_state.scores[0] - game_state.scores[1]) )#+ (w2 * (len(game_state.allowed_squares1) - len(game_state.allowed_squares2))))
         
         if ai_player_index == 1:
-            return (w1 * (game_state.scores[1] - game_state.scores[0]) + (w2 * (len(game_state.allowed_squares2) - len(game_state.allowed_squares1))))
+            return (w1 * (game_state.scores[1] - game_state.scores[0]) )#+ (w2 * (len(game_state.allowed_squares2) - len(game_state.allowed_squares1))))
 
 
     def minimax(self, game_state: GameState, depth: int, alpha: int, beta: int, maximizing: bool, ai_player_index: int):
@@ -184,8 +185,6 @@ class SudokuAI(competitive_sudoku.sudokuai.SudokuAI):
                 next_state = self.simulate_move(game_state, move)
                 score = self.minimax(next_state, depth, float("-inf"), float("inf"), maximizing=False, ai_player_index=ai_player_index)  # Include alpha/beta pruning
                 depth_move_scores.append((move, score)) # Save all the (moves, scores) from every depth as a tuple for sorting
-
-                # print(f"scores for move: {move} with depth={depth} best score={best_score} vs score={score}")
 
                 if score >= best_score:
                     best_score = score
